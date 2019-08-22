@@ -232,13 +232,6 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
     return originalResource.originalFilename;
 }
 
-- (NSString *)getPathForDirectory:(int)directory
-{
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(directory, NSUserDomainMask, YES);
-    return [paths firstObject];
-}
-
-
 - (void)imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary<NSString *,id> *)info
 {
     dispatch_block_t dismissCompletionBlock = ^{
@@ -270,11 +263,14 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         // If storage options are provided, we use the documents directory which is persisted
         if ([self.options objectForKey:@"storageOptions"] && [[self.options objectForKey:@"storageOptions"] isKindOfClass:[NSDictionary class]]) {
             NSDictionary *storageOptions = [self.options objectForKey:@"storageOptions"];
-            NSString *outputDirectory = ([storageOptions objectForKey:@"saveToCache"] boolValue]) ? [self getPathForDirectory:NSCachesDirectory] : [self getPathForDirectory:NSDocumentDirectory];
+
+            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSString *documentsDirectory = [paths objectAtIndex:0];
+            path = [documentsDirectory stringByAppendingPathComponent:fileName];
 
             // Creates documents subdirectory, if provided
             if ([storageOptions objectForKey:@"path"]) {
-                NSString *newPath = [outputDirectory stringByAppendingPathComponent:[storageOptions objectForKey:@"path"]];
+                NSString *newPath = [documentsDirectory stringByAppendingPathComponent:[storageOptions objectForKey:@"path"]];
                 NSError *error;
                 [[NSFileManager defaultManager] createDirectoryAtPath:newPath withIntermediateDirectories:YES attributes:nil error:&error];
                 if (error) {
@@ -285,9 +281,6 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
                 else {
                     path = [newPath stringByAppendingPathComponent:fileName];
                 }
-            }
-            else {
-                path = [outputDirectory stringByAppendingPathComponent:fileName];
             }
         }
 
