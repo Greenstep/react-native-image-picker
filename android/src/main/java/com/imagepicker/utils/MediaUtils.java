@@ -53,10 +53,9 @@ public class MediaUtils
         {
             final ReadableMap storageOptions = options.getMap("storageOptions");
 
-            boolean saveToPrivateDirectory = false;
             if (storageOptions.hasKey("privateDirectory"))
             {
-                saveToPrivateDirectory = storageOptions.getBoolean("privateDirectory");
+                boolean saveToPrivateDirectory = storageOptions.getBoolean("privateDirectory");
                 if (saveToPrivateDirectory)
                 {
                     // if privateDirectory is set then save to app's private files directory
@@ -68,12 +67,10 @@ public class MediaUtils
             {
                 path = new File(path, storageOptions.getString("path"));
             }
-        } 
-        else {
-            if (forceLocal) 
-            {
-                path = reactContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-            }
+        }
+        else if (forceLocal)
+        {
+            path = reactContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         }
 
         File result = new File(path, filename);
